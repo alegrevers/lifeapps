@@ -1,15 +1,28 @@
 const express = require('express');
 const Order = require('../models/Order');
 const { sendMessageToQueue } = require('../services/messaging');
+const OrderValidator = require('../validators/order-validator');
+const Inventory = require('../models/Inventory');
+const IdNotFoundError = require('../errors/id-not-found-error');
 
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-  const { customer_id, products } = req.body;
-
-  const newOrder = new Order({ customer_id, products });
-
+router.post('/', async (req, res, next) => {
   try {
+    let productsFound = []
+    const { customer_id, products } = req.body;
+
+    new OrderValidator().validateNewOrder(req.body)
+
+    for (const product of products) {
+      const foundProduct = await Inventory.findById(product._id)
+      if (foundProduct) productsFound.push(foundProduct)
+    }
+
+    if (productsFound.length < products.length) throw new IdNotFoundError()
+
+    const newOrder = new Order({ customer_id, products });
+
     await newOrder.save();
     await sendMessageToQueue('order_created', {
       order_id: newOrder._id,
@@ -21,7 +34,7 @@ router.post('/', async (req, res) => {
       message: 'Order successfully placed.'
     });
   } catch (err) {
-    res.status(500).json({ message: 'Error placing order', error: err });
+    next(err)
   }
 });
 

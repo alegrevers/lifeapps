@@ -9,13 +9,30 @@ services:
       - ecommerce-network
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq
     container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
     networks:
       - ecommerce-network
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:5672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+        - ecommerce-network
+    links:
+      - "order-service"
 
   order-service:
     build: ./order-service
@@ -27,16 +44,7 @@ services:
     networks:
         - ecommerce-network
 
-  inventory-service:
-    build: ./inventory-service
-    ports:
-      - "3001:3001"
-    depends_on:
-      - mongo
-      - rabbitmq
-    networks:
-        - ecommerce-network
-
 networks:
   ecommerce-network:
+    name: ecommerce-network
     driver: bridge
