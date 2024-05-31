@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "test": "jest --forceExit"
   },
   "dependencies": {
     "amqplib": "^0.10.4",
     "dotenv": "^16.4.5",
     "express": "^4.17.1",
-    "mongoose": "^5.10.9"
+    "jest": "^29.7.0",
+    "mongoose": "^5.10.9",
+    "supertest": "^7.0.0"
   }
 }

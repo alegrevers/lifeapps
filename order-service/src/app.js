@@ -1,17 +1,13 @@
-require('dotenv').config()
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const orderRoutes = require('./routes/orders');
+const database = require('./utils/database');
 
 const app = express();
 
 app.use(bodyParser.json());
 
-mongoose.connect(process.env.DATABASE_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+database
 
 app.use('/api/orders', orderRoutes);
 
@@ -28,3 +24,5 @@ app.use((err, req, res, next) => {
 app.listen(3000, () => {
   console.log('Order service listening on port 3000');
 });
+
+module.exports = app
