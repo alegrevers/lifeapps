@@ -5,6 +5,8 @@ services:
     container_name: mongo
     ports:
       - "27017:27017"
+    networks:
+      - ecommerce-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -12,6 +14,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - ecommerce-network
 
   order-service:
     build: ./order-service
@@ -20,6 +24,8 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+    networks:
+        - ecommerce-network
 
   inventory-service:
     build: ./inventory-service
@@ -28,3 +34,9 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+    networks:
+        - ecommerce-network
+
+networks:
+  ecommerce-network:
+    driver: bridge
